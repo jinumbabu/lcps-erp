@@ -1,0 +1,487 @@
+# LCPS ERP Development Documentation
+# Latex Compounding Production Scheduling System
+
+=============================================================================
+PROJECT OVERVIEW
+=============================================================================
+
+The LCPS ERP is an industrial production scheduling system for latex compounding
+operations. It provides real-time batch planning, delay management, timeline
+visualization, and user role-based access control.
+
+Current Status: Phase 1 (Core MVP) - COMPLETE
+All core features implemented and functional.
+
+=============================================================================
+COMPLETED FEATURES
+=============================================================================
+
+1. AUTHENTICATION & USER MANAGEMENT
+   - Email/Password authentication via Firebase Auth
+   - Google Sign-In integration
+   - User Management page (/users) for admin role management
+   - Role-based permissions (Admin, Supervisor, Operator)
+   - Automatic user profile creation on first login
+
+2. PLANNING SHEETS
+   - Excel-like tab interface for multiple planning sheets
+   - Create, rename, duplicate, delete planning sheets
+   - Real-time Firestore synchronization
+   - Batch count tracking per sheet
+
+3. BATCH MANAGEMENT (27-COLUMN SPREADSHEET)
+   - AG Grid Enterprise with custom industrial theme
+   - Forward scheduling (from stabilizer start time)
+   - Reverse scheduling (from desired line-up time)
+   - Auto-chaining: new batches automatically chain from previous batch finish
+   - Batch actions context menu (lock, unlock, duplicate, delete)
+   - Real-time cell editing with auto-save
+   - Column fields:
+     * Core: Batch Number, Preparation Tank, Raw Latex Qty
+     * Calculated: Batch Qty, Adjusted Qty, Runtime
+     * Timing: Stabilizer Start/End, Dispersion Start/End, Dewebber Time
+     * Line-up: Planned Line-Up, Planned Finish
+     * Maturation: Planned Maturation, Actual Maturation, Over Maturation
+     * Status: Delay Status, Delay Hours, First Batch flags
+     * Locking: Locked Status, Compounded Status
+
+4. SCHEDULING ENGINE
+   - Forward scheduling: calculates all times from stabilizer start
+   - Reverse scheduling: calculates stabilizer start from desired line-up
+   - Batch quantity formula: Raw Latex × 1.922
+   - Runtime formula: Adjusted Qty ÷ 576.6 kg/hour
+   - Process timeline: Stabilizer (2h) → Dispersion (5h) → Maturation → Running
+   - First batch special logic: Side Reserve (2000kg), Dip Tank (7000kg) deductions
+
+5. DELAY MANAGEMENT
+   - Automatic delay detection when actual line-up > planned line-up
+   - Delay status: On Time, Delayed, Critical
+   - Over-maturation tracking with warning (36h) and critical (48h) thresholds
+   - Chain recalculation: delayed batches trigger downstream batch recalculation
+   - Visual row coloring based on delay status
+
+6. TIMELINE / GANTT VIEW
+   - Visual timeline of all batches with process stages
+   - Color-coded stages: Stabilizer (blue), Dispersion (purple), Maturation (orange), Running (green)
+   - Delay and over-maturation indicators
+   - First batch markers
+   - Real-time "NOW" indicator
+   - 3-day visible window with scroll
+
+7. DASHBOARD
+   - KPI cards: Total Batches, Running Now, Delayed, Over-Matured, Compounded, Total Raw Latex, Tank Occupancy
+   - Tank occupancy grid visualization (20 tanks T001-T020)
+   - Upcoming line-ups list
+   - Planning sheets overview with delay counts
+   - Real-time data updates
+
+8. SETTINGS PAGE
+   - Admin-only configuration page (/settings)
+   - Configurable parameters:
+     * Latex consumption rate (default: 576.6 kg/hour)
+     * Batch multiplier (default: 1.922)
+     * Default maturation hours (default: 30)
+     * Process durations (stabilizer, dispersion, dewebber offsets)
+     * Deductions (side reserve, dip tank)
+     * Over-maturation thresholds
+   - Reset to defaults option
+   - Audit logging for all changes
+
+9. EXCEL EXPORT/IMPORT
+   - Export batches to Excel (.xlsx) with all 27 columns
+   - Import batches from Excel with validation
+   - Column mapping and data validation
+   - Timestamped filenames
+
+10. AUDIT LOGGING
+    - All batch operations logged (create, update, delete, lock, unlock, duplicate)
+    - Planning sheet operations logged
+    - Settings changes logged
+    - User role changes logged
+    - Stored in Firestore audit_logs collection
+
+=============================================================================
+TECHNOLOGY STACK
+=============================================================================
+
+Frontend:
+- Next.js 16.2.6 (React 19.2.4)
+- TypeScript 5
+- Tailwind CSS 4
+- AG Grid Community 35.2.1
+- Framer Motion 12.38.0
+- Zustand 5.0.13 (state management)
+- TanStack React Query 5.100.9
+- Date-fns 4.1.0
+- XLSX (Excel export/import)
+
+Backend:
+- Firebase (Auth, Firestore, Storage, Functions)
+- Real-time Firestore synchronization
+
+Development:
+- Node.js
+- npm package manager
+
+=============================================================================
+PROJECT STRUCTURE
+=============================================================================
+
+lcps-erp/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Home page with auth redirect
+│   │   ├── layout.tsx            # Root layout with metadata
+│   │   ├── globals.css           # Global styles (industrial dark theme)
+│   │   ├── login/
+│   │   │   └── page.tsx          # Login/signup page
+│   │   ├── dashboard/
+│   │   │   └── page.tsx          # Dashboard with KPIs
+│   │   ├── planning/
+│   │   │   └── [sheetId]/
+│   │   │       └── page.tsx      # Planning page with batch grid
+│   │   ├── timeline/
+│   │   │   └── [sheetId]/
+│   │   │       └── page.tsx      # Gantt timeline view
+│   │   ├── settings/
+│   │   │   └── page.tsx          # System settings page
+│   │   └── users/
+│   │       └── page.tsx          # User management page
+│   ├── components/
+│   │   ├── AppShell.tsx          # Main layout with sidebar
+│   │   ├── grid/
+│   │   │   ├── BatchGrid.tsx      # AG Grid spreadsheet
+│   │   │   └── GridColumns.tsx    # Column definitions
+│   │   └── planning/
+│   │       └── PlanningTabs.tsx   # Excel-like tabs
+│   ├── hooks/
+│   │   ├── useAuth.ts            # Auth state hook
+│   │   ├── useBatches.ts         # Batches real-time hook
+│   │   └── usePlanningSheets.ts  # Planning sheets hook
+│   ├── lib/
+│   │   ├── firebase.ts           # Firebase initialization
+│   │   └── constants.ts          # Business constants
+│   ├── services/
+│   │   ├── batchService.ts       # Batch CRUD operations
+│   │   ├── scheduleEngine.ts     # Scheduling calculations
+│   │   ├── delayEngine.ts        # Delay detection logic
+│   │   ├── planningSheetService.ts # Planning sheet CRUD
+│   │   ├── auditService.ts       # Audit logging
+│   │   ├── settingsService.ts    # Settings management
+│   │   ├── userService.ts        # User management
+│   │   └── excelService.ts       # Excel export/import
+│   ├── store/
+│   │   ├── authStore.ts          # Auth state (Zustand)
+│   │   ├── batchStore.ts         # Batch state (Zustand)
+│   │   └── planningStore.ts      # Planning sheet state (Zustand)
+│   └── types/
+│       └── index.ts              # TypeScript interfaces
+├── .env.local                    # Firebase configuration
+├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript config
+├── tailwind.config.ts           # Tailwind config
+└── next.config.js                # Next.js config
+
+=============================================================================
+SETUP INSTRUCTIONS
+=============================================================================
+
+Prerequisites:
+- Node.js 18+ installed
+- npm or yarn package manager
+- Firebase project created
+
+1. Clone the repository:
+   git clone <repository-url>
+   cd lcps-erp
+
+2. Install dependencies:
+   npm install
+
+3. Configure Firebase:
+   - Create a Firebase project at https://console.firebase.google.com/
+   - Enable Authentication (Email/Password and Google providers)
+   - Create Firestore Database
+   - Enable Storage (optional, for future file uploads)
+   - Copy your Firebase configuration
+   - Create .env.local file with:
+     
+     NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+     NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+     NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+4. Run development server:
+   npm run dev
+
+5. Open browser:
+   Navigate to http://localhost:3000
+
+=============================================================================
+HOW TO USE THE APPLICATION
+=============================================================================
+
+1. FIRST TIME SETUP
+   - Sign up using email/password or Google Sign-In
+   - First user automatically gets Operator role
+   - To become Admin, manually update in Firestore users collection
+   - Navigate to /users (admin only) to manage roles
+
+2. CREATING A PLANNING SHEET
+   - Click the "+" tab button to create a new planning sheet
+   - Name your planning sheet (e.g., "Week 1 Production")
+   - Tabs appear at the top of the planning page
+
+3. ADDING BATCHES
+   - Click "Add Batch" button in planning page header
+   - Choose scheduling mode:
+     * Forward: Set stabilizer start time, system calculates everything downstream
+     * Reverse: Set desired line-up time, system calculates backward
+   - Enter:
+     * Preparation Tank number (e.g., 211 for T211)
+     * Raw Latex Quantity (kg)
+     * Planned Maturation hours (default: 30)
+   - View live preview of calculated schedule
+   - Click "Add Batch" to create
+
+4. EDITING BATCHES
+   - Click any cell in the grid to edit
+   - Changes auto-save to Firestore
+   - Locked batches cannot be edited (admin unlock required)
+   - Editing stabilizer start or quantities recalculates schedule
+   - Editing actual line-up time triggers delay detection
+
+5. BATCH ACTIONS (CONTEXT MENU)
+   - Click the "⋮" menu button in the Actions column
+   - Options:
+     * Lock Batch: Mark as compounded, prevents edits
+     * Unlock Batch: Admin only, unlocks a locked batch
+     * Duplicate Batch: Creates a copy chained after last batch
+     * Delete Batch: Removes batch (cannot delete locked batches)
+
+6. VIEWING TIMELINE
+   - Click "Timeline" button in planning page header
+   - Visual Gantt chart showing all process stages
+   - Color-coded stages with hover tooltips
+   - Scroll to view different time ranges
+   - "NOW" indicator shows current time
+
+7. MONITORING DASHBOARD
+   - Navigate to /dashboard
+   - View KPI cards for production status
+   - Check tank occupancy grid (green = occupied, gray = available)
+   - Review upcoming line-ups
+   - Check planning sheets for delays
+
+8. MANAGING SETTINGS (ADMIN ONLY)
+   - Navigate to /settings
+   - Adjust system parameters:
+     * Production calculation constants
+     * Process durations
+     * Deduction values
+     * Thresholds
+   - Click "Save Changes" to apply
+   - Click "Reset to Defaults" to restore factory settings
+
+9. MANAGING USERS (ADMIN ONLY)
+   - Navigate to /users
+   - View all registered users
+   - Change user roles via dropdown
+   - Cannot change your own role
+   - Role permissions displayed
+
+10. EXCEL OPERATIONS
+    - Export: Click "Export" button in planning page header
+    - Downloads Excel file with all batch data
+    - Import: Click "Import" button
+    - Select .xlsx file with batch data
+    - System validates and imports batches
+
+=============================================================================
+FIREBASE COLLECTIONS
+=============================================================================
+
+users: User profiles with roles and timestamps
+planning_sheets: Planning sheet definitions
+  └── batches (subcollection): Batch records per sheet
+settings: System configuration (single document)
+audit_logs: Change history and audit trail
+presence: Real-time user presence (for future collaboration)
+
+================================================================<arg_value>BUSINESS LOGIC REFERENCE
+=========================================================================
+
+Batch Quantity Formula:
+  Batch Qty = Raw Latex Qty × 1.922
+
+Adjusted Batch Quantity:
+  If First Batch:
+    - Side Reserve: subtract 2000kg
+    - Dip Tank: subtract 7000kg
+  Adjusted Qty = Batch Qty - Deductions
+
+Runtime Formula:
+  Runtime (hours) = Adjusted Qty ÷ 576.6
+
+Process Timeline:
+  1. Stabilizer Start (user input or calculated)
+  2. Stabilizer End = Stabilizer Start + 2 hours
+  3. Dispersion Start = Stabilizer Start + 5 hours
+  4. Dispersion End = Dispersion Start + 5 hours
+  5. Dewebber Time = Line-Up Time - 4 hours
+  6. Line-Up Time = Dispersion End + Planned Maturation
+  7. Finish Time = Line-Up Time + Runtime
+
+Delay Detection:
+  Delay Hours = Actual Line-Up - Planned Line-Up
+  If Delay Hours > 0:
+    - Status = Delayed (if < 6 hours)
+    - Status = Critical (if >= 6 hours)
+
+Over-Maturation:
+  Actual Maturation = Actual Line-Up - Dispersion End
+  Over Maturation = Actual Maturation - Planned Maturation
+  Warning threshold: 36 hours
+  Critical threshold: 48 hours
+
+Chain Recalculation:
+  When batch N is delayed:
+  - Batch N+1 stabilizer start = Batch N finish time
+  - Batch N+1 maturation = Planned Maturation + Delay Hours
+  - Recalculate all downstream batches
+
+=============================================================================
+DEVELOPMENT NOTES
+=============================================================================
+
+- Real-time sync: All data syncs via Firestore onSnapshot
+- Multi-user support: Multiple users can edit simultaneously
+- Conflict resolution: Last write wins (consider adding optimistic locking)
+- Performance: AG Grid handles 1000+ rows efficiently
+- Browser compatibility: Modern browsers (Chrome, Firefox, Edge, Safari)
+- Mobile: Responsive design works on tablets, limited on phones
+
+Known Limitations:
+- No offline support (requires internet for Firebase)
+- No undo/redo for batch operations (except AG Grid cell editing)
+- Tank occupancy assumes 20 tanks (T201-T220) - make configurable
+- No tank conflict detection (multiple batches in same tank)
+- No production line capacity constraints
+
+Future Enhancements (Phase 2):
+- Real-time collaboration with presence indicators
+- Tank conflict detection and resolution
+- Production line capacity planning
+- Advanced reporting and analytics
+- Mobile app (React Native)
+- Offline support with PWA
+- Email notifications for delays
+- Integration with ERP/MES systems
+
+=============================================================================
+TROUBLESHOOTING
+=============================================================================
+
+Google Sign-In Not Working:
+1. Enable Google Sign-In in Firebase Console:
+   - Go to Firebase Console → Authentication → Sign-in method
+   - Click on Google and enable it
+   - Add your project's authorized domain (e.g., localhost, your production domain)
+   - Save configuration
+
+2. Authorized Domain Configuration:
+   - Firebase Console → Authentication → Settings → Authorized domains
+   - Add: localhost (for development)
+   - Add: 127.0.0.1 (for local preview)
+   - Add: your production domain when deployed
+
+3. Browser Popup Blocking:
+   - If popup is blocked, the app automatically falls back to redirect method
+   - Allow popups for localhost in your browser settings
+   - Check browser console for "auth/popup-blocked" error
+
+4. Common Error Messages:
+   - "auth/unauthorized-domain": Add domain to Firebase authorized domains
+   - "auth/configuration-not-found": Enable Google Sign-In in Firebase Console
+   - "auth/popup-blocked": Allow popups or use redirect method (automatic fallback)
+
+Firebase connection issues:
+- Verify .env.local has correct Firebase config
+- Check Firebase console: Auth enabled, Firestore created
+- Ensure Firebase project is not in production mode with restricted access
+
+Batch not chaining:
+- Check that previous batch has plannedFinishTime
+- Verify batchService.ts chain logic
+- Check browser console for errors
+
+Grid not loading:
+- Check Firestore security rules
+- Verify user has read permissions
+- Check browser console for errors
+
+Import failing:
+- Ensure Excel file has correct column headers
+- Check data types (numbers should be numeric)
+- Verify file is .xlsx format
+
+Settings not saving:
+- Verify user has Admin role
+- Check Firestore write permissions
+- Check browser console for errors
+
+=============================================================================
+PRODUCTION DEPLOYMENT
+=============================================================================
+
+Quick Deploy to Vercel:
+1. Push code to GitHub
+2. Import project on vercel.com
+3. Add environment variables (NEXT_PUBLIC_FIREBASE_*)
+4. Deploy
+
+Environment Variables Required:
+- NEXT_PUBLIC_FIREBASE_API_KEY
+- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+- NEXT_PUBLIC_FIREBASE_PROJECT_ID
+- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+- NEXT_PUBLIC_FIREBASE_APP_ID
+
+See DEPLOYMENT.md for complete instructions.
+
+Firebase Setup:
+1. Create project at https://console.firebase.google.com/
+2. Enable Authentication (Email/Password + Google)
+3. Create Firestore database
+4. Configure security rules
+5. Add authorized domains (localhost, vercel.app, custom domain)
+
+Multi-Device Access:
+- Real-time sync via Firestore
+- Session persistence enabled
+- Offline support with IndexedDB
+- Responsive design for mobile/tablet/desktop
+- PWA manifest included
+
+Production Features:
+- Error boundary for crash handling
+- Loading states for better UX
+- Network status indicators
+- Responsive breakpoints (mobile <640px, tablet <1024px, desktop >1024px)
+- Touch-optimized for factory floor tablets
+
+=============================================================================
+CONTACT & SUPPORT
+=============================================================================
+
+For issues or questions:
+- Check Firebase console for error logs
+- Review browser console for client-side errors
+- Check Firestore audit_logs for change history
+- Review DEPLOYMENT.md for troubleshooting
+- See documentation in /DEPLOYMENT.md
+
+=============================================================================

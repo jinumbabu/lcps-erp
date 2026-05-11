@@ -1,26 +1,1075 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* ============================================================
+   LCPS ERP — Industrial Dark Design System
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color palette */
+  --bg-primary: #0d1117;
+  --bg-surface: #161b22;
+  --bg-card: #1c2128;
+  --bg-elevated: #21262d;
+  --bg-hover: #2d333b;
+
+  --border-subtle: #30363d;
+  --border-default: #3d444d;
+  --border-strong: #4f5a66;
+
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --text-link: #58a6ff;
+
+  --accent-orange: #f78166;
+  --accent-orange-hover: #ff8d73;
+  --accent-green: #3fb950;
+  --accent-green-hover: #56d364;
+  --accent-amber: #e3b341;
+  --accent-red: #ff7b72;
+  --accent-blue: #58a6ff;
+  --accent-purple: #bc8cff;
+
+  /* Process stage colors (Gantt) */
+  --stage-stabilizer: #3b82f6;
+  --stage-dispersion: #8b5cf6;
+  --stage-maturation: #f97316;
+  --stage-running: #22c55e;
+  --stage-finished: #6b7280;
+  --stage-first-batch: #eab308;
+  --stage-delayed: #ef4444;
+  --stage-over-matured: #991b1b;
+
+  /* Grid specific */
+  --grid-row-height: 48px;
+  --grid-header-height: 44px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Base Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow-x: hidden;
 }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ── Typography ─────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+/* ── AG Grid Industrial Theme Override ──────────────────────── */
+.ag-theme-lcps {
+  --ag-background-color: var(--bg-surface);
+  --ag-header-background-color: var(--bg-elevated);
+  --ag-odd-row-background-color: var(--bg-surface);
+  --ag-row-hover-color: var(--bg-hover);
+  --ag-selected-row-background-color: rgba(88, 166, 255, 0.08);
+  --ag-border-color: var(--border-subtle);
+  --ag-header-column-separator-color: var(--border-default);
+  --ag-cell-horizontal-border: solid var(--border-subtle);
+  --ag-foreground-color: var(--text-primary);
+  --ag-secondary-foreground-color: var(--text-secondary);
+  --ag-header-foreground-color: var(--text-secondary);
+  --ag-font-family: "Inter", sans-serif;
+  --ag-font-size: 13px;
+  --ag-row-height: var(--grid-row-height);
+  --ag-header-height: var(--grid-header-height);
+  --ag-cell-horizontal-padding: 12px;
+  --ag-input-focus-border-color: var(--accent-blue);
+  --ag-checkbox-checked-color: var(--accent-blue);
+  --ag-range-selection-border-color: var(--accent-blue);
+}
+
+/* ── Batch Row Status Colors ────────────────────────────────── */
+.ag-theme-lcps .row-delayed {
+  background-color: rgba(239, 68, 68, 0.06) !important;
+  border-left: 3px solid var(--stage-delayed) !important;
+}
+
+.ag-theme-lcps .row-critical,
+.ag-theme-lcps .row-over-matured {
+  background-color: rgba(153, 27, 27, 0.12) !important;
+  border-left: 3px solid var(--stage-over-matured) !important;
+}
+
+.ag-theme-lcps .row-first-batch {
+  background-color: rgba(234, 179, 8, 0.05) !important;
+  border-left: 3px solid var(--stage-first-batch) !important;
+}
+
+.ag-theme-lcps .row-finished {
+  background-color: rgba(107, 114, 128, 0.06) !important;
+  opacity: 0.75;
+}
+
+.ag-theme-lcps .row-locked {
+  background-color: rgba(107, 114, 128, 0.1) !important;
+  cursor: not-allowed;
+}
+
+/* ── AG Grid Header ─────────────────────────────────────────── */
+.ag-theme-lcps .ag-header {
+  border-bottom: 1px solid var(--border-default);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ag-theme-lcps .ag-header-cell-label {
+  color: var(--text-secondary);
+}
+
+/* ── AG Grid Cells ──────────────────────────────────────────── */
+.ag-theme-lcps .ag-cell {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.ag-theme-lcps .ag-cell-focus {
+  border: 1px solid var(--accent-blue) !important;
+  outline: none;
+}
+
+/* ── Status Pill ────────────────────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.status-on-time { background: rgba(63, 185, 80, 0.12); color: var(--accent-green); }
+.status-delayed { background: rgba(239, 68, 68, 0.12); color: var(--accent-red); }
+.status-critical { background: rgba(153, 27, 27, 0.2); color: #ff4444; }
+.status-compounded { background: rgba(88, 166, 255, 0.12); color: var(--accent-blue); }
+.status-locked { background: rgba(107, 114, 128, 0.15); color: var(--text-secondary); }
+
+/* ── Planning Tabs ──────────────────────────────────────────── */
+.planning-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px 6px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tab-item:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.tab-item.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  border-bottom: 1px solid var(--bg-surface);
+  margin-bottom: -1px;
+}
+
+.tab-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.tab-add-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* ── Card Component ─────────────────────────────────────────── */
+.lcps-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+  transition: border-color 0.15s ease;
+}
+
+.lcps-card:hover {
+  border-color: var(--border-default);
+}
+
+/* ── KPI Card ───────────────────────────────────────────────── */
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-1px);
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Button Styles ──────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--accent-orange);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-primary:hover {
+  background: var(--accent-orange-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 123, 114, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(255, 123, 114, 0.2);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 123, 114, 0.2);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+/* ── Input Styles ───────────────────────────────────────────── */
+.lcps-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.lcps-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.1);
+}
+
+.lcps-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── Badge ──────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-delayed { background: rgba(239, 68, 68, 0.12); color: var(--stage-delayed); }
+.badge-critical { background: rgba(153, 27, 27, 0.2); color: #ff4444; }
+.badge-on-time { background: rgba(63, 185, 80, 0.12); color: var(--accent-green); }
+.badge-locked { background: rgba(88, 166, 255, 0.12); color: var(--accent-blue); }
+.badge-warning { background: rgba(227, 179, 65, 0.12); color: var(--accent-amber); }
+
+/* ── Divider ────────────────────────────────────────────────── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
+
+.pulse-alert {
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+/* ── Gantt Chart ────────────────────────────────────────────── */
+.gantt-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.gantt-bar {
+  height: 24px;
+  border-radius: 3px;
+  position: absolute;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+
+.gantt-bar:hover {
+  opacity: 1;
+}
+
+/* ── Sidebar / Navigation ───────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 0 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  border-radius: 0;
+  margin: 0 8px;
+  border-radius: 6px;
+}
+
+.nav-item:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--bg-hover);
+  color: var(--accent-orange);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--accent-orange);
+}
+
+/* ── Page Layout ────────────────────────────────────────────── */
+.page-layout {
+  margin-left: 220px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.page-content {
+  flex: 1;
+  padding: 24px;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.grid-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+/* ── Loading Skeleton ───────────────────────────────────────── */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ── Form Group ─────────────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Tooltip ────────────────────────────────────────────────── */
+.tooltip {
+  position: relative;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+
+.tooltip:hover .tooltip-content {
+  opacity: 1;
+}
+
+/* ── Checkbox ───────────────────────────────────────────────── */
+.lcps-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-orange);
+  cursor: pointer;
+}
+
+/* ── Alert Banner ───────────────────────────────────────────── */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.alert-warning {
+  background: rgba(227, 179, 65, 0.1);
+  border: 1px solid rgba(227, 179, 65, 0.2);
+  color: var(--accent-amber);
+}
+
+.alert-danger {
+  background: rgba(255, 123, 114, 0.1);
+  border: 1px solid rgba(255, 123, 114, 0.2);
+  color: var(--accent-red);
+}
+
+.alert-success {
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  color: var(--accent-green);
+}
+
+/* ── Presence Avatars ───────────────────────────────────────── */
+.presence-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--bg-primary);
+  margin-left: -8px;
+  transition: transform 0.15s;
+}
+
+.presence-avatar:first-child {
+  margin-left: 0;
+}
+
+.presence-avatar:hover {
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN — Mobile, Tablet, Desktop
+   ============================================================ */
+
+/* ── Breakpoints ───────────────────────────────────────────────
+   Mobile: < 640px
+   Tablet: 640px - 1024px
+   Desktop: > 1024px
+*/
+
+/* ── Mobile Optimizations (< 640px) ────────────────────────── */
+@media (max-width: 640px) {
+  html {
+    font-size: 13px;
+  }
+
+  /* Sidebar becomes bottom nav on mobile */
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  /* Main content adjusts */
+  .main-content {
+    padding: 12px;
+  }
+
+  /* Page headers stack */
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  /* Grid becomes horizontally scrollable */
+  .ag-theme-lcps {
+    min-width: 800px;
+    overflow-x: auto;
+  }
+
+  /* KPI cards stack */
+  .kpi-card {
+    min-width: auto;
+    width: 100%;
+  }
+
+  /* Buttons full width on mobile */
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modals full screen on mobile */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  /* Planning tabs scroll horizontally */
+  .planning-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  /* Tank occupancy grid smaller cells */
+  .tank-occupancy-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .tank-cell {
+    aspect-ratio: 1;
+    font-size: 10px;
+  }
+
+  /* Reduce padding in cards */
+  .lcps-card {
+    padding: 12px;
+  }
+}
+
+/* ── Tablet Optimizations (640px - 1024px) ───────────────────── */
+@media (min-width: 641px) and (max-width: 1024px) {
+  html {
+    font-size: 13.5px;
+  }
+
+  /* Sidebar narrower on tablet */
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  /* Main content padding reduced */
+  .main-content {
+    padding: 16px;
+  }
+
+  /* KPI cards 2 per row */
+  .kpi-card {
+    min-width: calc(50% - 8px);
+  }
+
+  /* Tank occupancy grid 10 cells per row */
+  .tank-occupancy-grid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+
+  /* Planning tabs allow some wrapping */
+  .planning-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Modals slightly larger padding */
+  .modal-content {
+    min-width: 500px;
+    max-width: 90vw;
+  }
+}
+
+/* ── Desktop Optimizations (> 1024px) ──────────────────────── */
+@media (min-width: 1025px) {
+  /* Full sidebar */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  /* Standard padding */
+  .main-content {
+    padding: 24px;
+  }
+
+  /* KPI cards auto-fill */
+  .kpi-card {
+    min-width: 200px;
+  }
+
+  /* Tank occupancy grid full display */
+  .tank-occupancy-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  /* Modals comfortable size */
+  .modal-content {
+    min-width: 600px;
+    max-width: 800px;
+  }
+}
+
+/* ── Large Desktop (> 1440px) ──────────────────────────────── */
+@media (min-width: 1440px) {
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Planning grid more spacious */
+  .ag-theme-lcps {
+    font-size: 14px;
+  }
+
+  /* Cards more padding */
+  .lcps-card {
+    padding: 24px;
+  }
+}
+
+/* ── Touch Device Optimizations ──────────────────────────────── */
+@media (pointer: coarse) {
+  /* Larger touch targets */
+  .nav-link,
+  .btn-primary,
+  .btn-secondary,
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger scrollbars on touch */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Prevent text selection on touch */
+  .ag-theme-lcps {
+    user-select: none;
+  }
+
+  /* Enable text selection in inputs */
+  .lcps-input,
+  .ag-cell-edit-input {
+    user-select: text;
+  }
+}
+
+/* ── Print Styles (for reports) ──────────────────────────────── */
+@media print {
+  .sidebar,
+  .page-header button,
+  .batch-actions-menu-trigger,
+  .planning-tabs {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0;
+    margin: 0;
+  }
+
+  .ag-theme-lcps {
+    font-size: 10px;
+    --ag-row-height: 36px;
+  }
+
+  .lcps-card {
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+}
+
+/* ── High DPI / Retina Display ──────────────────────────────── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders on high DPI */
+  .lcps-card,
+  .btn-primary,
+  .btn-secondary {
+    border-width: 0.5px;
+  }
+}
+
+/* ── Reduced Motion (Accessibility) ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Dark Mode (System Preference) ──────────────────────────── */
+@media (prefers-color-scheme: light) {
+  /* System prefers light mode, but we keep dark for industrial ERP */
+  /* This is intentional - industrial systems typically use dark themes */
+}
+
+/* ── Landscape Mode on Mobile ──────────────────────────────── */
+@media (max-width: 640px) and (orientation: landscape) {
+  .sidebar {
+    display: none;
+  }
+
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .main-content {
+    padding: 8px;
+  }
+}
+
+/* ── Network Status Indicator ──────────────────────────────── */
+.network-status {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.network-status.online {
+  color: var(--accent-green);
+}
+
+.network-status.offline {
+  color: var(--accent-red);
+}
+
+.network-status.syncing {
+  color: var(--accent-amber);
+}
+
+/* ── Mobile Bottom Navigation ──────────────────────────────── */
+@media (max-width: 640px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-decoration: none;
+  }
+
+  .mobile-bottom-nav-item.active {
+    color: var(--accent-orange);
+  }
+
+  /* Add padding to main content for bottom nav */
+  .main-content {
+    padding-bottom: 72px;
+  }
+}
+
+/* ── Safe Area for Notch Devices ─────────────────────────────── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .app-shell {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ============================================================
+   END RESPONSIVE DESIGN
+   ============================================================ */

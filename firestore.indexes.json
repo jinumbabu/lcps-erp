@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "batches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "planningSheetId", "order": "ASCENDING" },
+        { "fieldPath": "batchNumber", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "batches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "delayStatus", "order": "ASCENDING" },
+        { "fieldPath": "plannedLineupTime", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "batches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "lockedStatus", "order": "ASCENDING" },
+        { "fieldPath": "batchNumber", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

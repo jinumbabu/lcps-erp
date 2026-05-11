@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ───────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isSupervisor() {
+      return hasRole('supervisor') || isAdmin();
+    }
+
+    function isOperator() {
+      return isSignedIn();
+    }
+
+    function isLocked(data) {
+      return data.lockedStatus == true;
+    }
+
+    // ── Users ──────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Planning Sheets ────────────────────────────────────────
+    match /planning_sheets/{sheetId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSupervisor();
+      allow delete: if isAdmin();
+
+      // ── Batches (subcollection) ──────────────────────────────
+      match /batches/{batchId} {
+        allow read: if isSignedIn();
+
+        // Create: supervisor+ only
+        allow create: if isSupervisor();
+
+        // Update: supervisor+ and batch must not be locked
+        // EXCEPT: admin can update even locked batches (for unlock)
+        allow update: if isAdmin()
+          || (isSupervisor() && !isLocked(resource.data));
+
+        // Delete: admin only, and batch must not be locked
+        allow delete: if isAdmin() && !isLocked(resource.data);
+      }
+    }
+
+    // ── Tanks ──────────────────────────────────────────────────
+    match /tanks/{tankId} {
+      allow read: if isSignedIn();
+      allow write: if isSupervisor();
+    }
+
+    // ── Audit Logs ─────────────────────────────────────────────
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false; // immutable
+    }
+
+    // ── Settings ───────────────────────────────────────────────
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── Presence (ephemeral, for multi-user awareness) ─────────
+    match /presence/{userId} {
+      allow read: if isSignedIn();
+      allow write: if request.auth.uid == userId;
+    }
+  }
+}
